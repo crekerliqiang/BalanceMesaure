@@ -52,57 +52,87 @@ namespace BalanceMeasure
         private int port1DataCounter = 0;
         private int port2DataCounter = 0;
         //过滤数据
-        private const int FILTER = 2;
+        private const int FILTER = 1;
+        //顺序锁
+        int queueSerial = 0;//1表示A接收 2表示B接收
         private void port1_DataReceived(object sender, SerialDataReceivedEventArgs e)//串口数据接收事件
         {
-            if (!isStarted) return;
-            //port 1
-            try
+            //lock (lockRecivedData)
+            {
+                //顺序
+                if (queueSerial.Equals(1))
                 {
-                    int ilen = serialPort1.BytesToRead;
-                    byte[] bytes = new byte[ilen];
-                    serialPort1.Read(bytes, 0, ilen);
-                    string str = System.Text.Encoding.Default.GetString(bytes); //xx="中文";
+                    return;
+                }
+                queueSerial = 1;
+                //port 1
+                try
+                    {
+                        int ilen = serialPort1.BytesToRead;
+                        byte[] bytes = new byte[ilen];
+                        serialPort1.Read(bytes, 0, ilen);
+                        string str = System.Text.Encoding.Default.GetString(bytes); //xx="中文";
+                    if (!isStarted) return;
+
                     textBox1.AppendText(str + '\r' + '\n');//添加内容
 
-                    port1DataCounter++;
-                    if (port1DataCounter % FILTER == 0)
-                    {
+                        port1DataCounter++;
+                        if (port1DataCounter % FILTER == 0)
+                        {
+                            string[] sArray = Regex.Split(str, "-", RegexOptions.IgnoreCase);
+                        str = sArray[sArray.Length - 1];
+                        Console.WriteLine("add countA " + str + " num " + dataQueueSerialA.Count + "\r\n");
+
                         float f1 = Math.Abs(Convert.ToSingle(str));
-                        checkRemoveQueue();
-                        //对数据B 做处理 方便显示
-                        f1 += 1f;
-                        dataQueueSerialA.Enqueue(f1);
+                            checkRemoveQueue();
+                            //对数据B 做处理 方便显示
+                            f1 += 1f;
+                            dataQueueSerialA.Enqueue(f1);
                     }
-                }catch{
-                    textBox1.AppendText("串口数据接收出错，请检查!\r\n");
-                }
+                    }catch{
+                        textBox1.AppendText("串口数据接收出错，请检查!\r\n");
+                    }
+            }
+
         }
         private void port2_DataReceived(object sender, SerialDataReceivedEventArgs e)//串口数据接收事件
         {
             //port 2
-            if (!isStarted)return;
-
-            try
+            //lock (lockRecivedData)
             {
-                int ilen = serialPort2.BytesToRead;
-                byte[] bytes = new byte[ilen];
-                serialPort2.Read(bytes, 0, ilen);
-                string str = System.Text.Encoding.Default.GetString(bytes); //xx="中文";
-                textBox2.AppendText(str + '\r' + '\n');//添加内容
-
-                port2DataCounter++;
-                if (port2DataCounter % FILTER == 0)
+                //顺序
+                if (queueSerial.Equals(2))
                 {
-                    float f1 = Math.Abs(Convert.ToSingle(str));
-                    checkRemoveQueue();
-                    //对数据B 做处理 方便显示
-                    f1 += 15.0f;
-                    dataQueueSerialB.Enqueue(f1);
+                    return;
                 }
-            }catch{
-                    textBox2.AppendText("串口数据接收出错，请检查!\r\n");
+                queueSerial = 2;
+                try
+                {
+                    int ilen = serialPort2.BytesToRead;
+                    byte[] bytes = new byte[ilen];
+                    serialPort2.Read(bytes, 0, ilen);
+                    string str = System.Text.Encoding.Default.GetString(bytes); //xx="中文";
+                    if (!isStarted) return;
+                    textBox2.AppendText(str + '\r' + '\n');//添加内容
+
+                    port2DataCounter++;
+                    if (port2DataCounter % FILTER == 0)
+                    {
+                        string[] sArray = Regex.Split(str, "-", RegexOptions.IgnoreCase);
+                        str = sArray[sArray.Length - 1];
+                        Console.WriteLine("add countB " + str + " num " + dataQueueSerialB.Count + "\r\n");
+                        float f1 = Math.Abs(Convert.ToSingle(str));
+                        checkRemoveQueue();
+                        //对数据B 做处理 方便显示
+                        //f1 += (Y_MAX / 2);
+                        f1 += 1f;
+                        dataQueueSerialB.Enqueue(f1);
+                    }
+                }catch{
+                        textBox2.AppendText("串口数据接收出错，请检查!\r\n");
+                }
             }
+
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -194,7 +224,7 @@ namespace BalanceMeasure
 
 
         //图表
-        private const int Y_MAX = 30;
+        private const int Y_MAX = 20;
         private const int QUEUE_LEN = 20;
         private Queue<double> dataQueueSerialA = new Queue<double>(QUEUE_LEN);
         private Queue<double> dataQueueSerialB = new Queue<double>(QUEUE_LEN);
@@ -202,6 +232,11 @@ namespace BalanceMeasure
    
         private void btnStart_Click(object sender, EventArgs e)
         {
+            if (comboBox1.Enabled != false && comboBox3.Enabled != false)
+            {
+                MessageBox.Show("请先连接端口");
+                return;
+            }
             if (!isStarted)
             {
                 this.timer1.Start();
@@ -231,7 +266,7 @@ namespace BalanceMeasure
             int countA = dataQueueSerialA.Count;
             int countB = dataQueueSerialB.Count;
             int countMax = countA > countB ? countA : countB;
-            Console.WriteLine("countA " + dataQueueSerialA.Count + "countB " + dataQueueSerialB.Count + "\r\n");
+            //Console.WriteLine("countA " + dataQueueSerialA.Count + "countB " + dataQueueSerialB.Count + "\r\n");
             for (int i = 0; i < countMax; i++){
                 if (i < countA) {
                     this.chart1.Series[0].Points.AddY(dataQueueSerialA.ElementAt(i));
@@ -304,19 +339,21 @@ namespace BalanceMeasure
         {
             if (dataQueueSerialA.Count >= QUEUE_LEN)
             {
+                dataQueueSerialA.Clear();
                 //先出列
-                for (int i = 0; i < dataQueueSerialA.Count; i++)
-                {
-                    dataQueueSerialA.Dequeue();
-                }
+                //for (int i = 0; i < dataQueueSerialA.Count; i++)
+                //{
+                //    dataQueueSerialA.Dequeue();
+                //}
             }
             if (dataQueueSerialB.Count >= QUEUE_LEN)
             {
+                dataQueueSerialB.Clear();
                 //先出列
-                for (int i = 0; i < dataQueueSerialB.Count; i++)
-                {
-                    dataQueueSerialB.Dequeue();
-                }
+                //for (int i = 0; i < dataQueueSerialB.Count; i++)
+                //{
+                //    dataQueueSerialB.Dequeue();
+                //}
             }
         }
 
