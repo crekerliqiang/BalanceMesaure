@@ -41,6 +41,7 @@ namespace BalanceMeasure
         {
             InitializeComponent();
             System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
+            InitChart();
         }
         
         private void Form1_Load(object sender, EventArgs e)
@@ -51,11 +52,12 @@ namespace BalanceMeasure
         private int port1DataCounter = 0;
         private int port2DataCounter = 0;
         //过滤数据
-        private const int FILTER = 3;
+        private const int FILTER = 2;
         private void port1_DataReceived(object sender, SerialDataReceivedEventArgs e)//串口数据接收事件
         {
+            if (!isStarted) return;
             //port 1
-                try
+            try
                 {
                     int ilen = serialPort1.BytesToRead;
                     byte[] bytes = new byte[ilen];
@@ -72,24 +74,22 @@ namespace BalanceMeasure
                         f1 += 1f;
                         dataQueueSerialA.Enqueue(f1);
                     }
-                  
-                }
-                catch
-                {
+                }catch{
                     textBox1.AppendText("串口数据接收出错，请检查!\r\n");
                 }
-        
         }
         private void port2_DataReceived(object sender, SerialDataReceivedEventArgs e)//串口数据接收事件
         {
             //port 2
-                try
-                {
-                    int ilen = serialPort2.BytesToRead;
-                    byte[] bytes = new byte[ilen];
-                    serialPort2.Read(bytes, 0, ilen);
-                    string str = System.Text.Encoding.Default.GetString(bytes); //xx="中文";
-                    textBox2.AppendText(str + '\r' + '\n');//添加内容
+            if (!isStarted)return;
+
+            try
+            {
+                int ilen = serialPort2.BytesToRead;
+                byte[] bytes = new byte[ilen];
+                serialPort2.Read(bytes, 0, ilen);
+                string str = System.Text.Encoding.Default.GetString(bytes); //xx="中文";
+                textBox2.AppendText(str + '\r' + '\n');//添加内容
 
                 port2DataCounter++;
                 if (port2DataCounter % FILTER == 0)
@@ -100,11 +100,9 @@ namespace BalanceMeasure
                     f1 += 15.0f;
                     dataQueueSerialB.Enqueue(f1);
                 }
-            }
-                catch
-                {
+            }catch{
                     textBox2.AppendText("串口数据接收出错，请检查!\r\n");
-                }
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -200,19 +198,27 @@ namespace BalanceMeasure
         private const int QUEUE_LEN = 20;
         private Queue<double> dataQueueSerialA = new Queue<double>(QUEUE_LEN);
         private Queue<double> dataQueueSerialB = new Queue<double>(QUEUE_LEN);
-        private int curValue = 0;
-        private int num = 5;//每次删除增加几个点
-        private void btnInit_Click(object sender, EventArgs e)
-        {
-            InitChart();
-        }
+        private bool isStarted = false;
+   
         private void btnStart_Click(object sender, EventArgs e)
         {
-            this.timer1.Start();
+            if (!isStarted)
+            {
+                this.timer1.Start();
+                isStarted = true;
+                btnStart.Text = "结束";
+            }
+            else
+            {
+                this.timer1.Stop();
+                isStarted = false;
+                btnStart.Text = "开始";
+            }
+         
         }
         private void btnStop_Click(object sender, EventArgs e)
         {
-            this.timer1.Stop();
+          
         }
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -220,13 +226,19 @@ namespace BalanceMeasure
             //定时更新数据
             this.chart1.Series[0].Points.Clear();
             this.chart1.Series[1].Points.Clear();
-            for (int i = 0; i < dataQueueSerialA.Count; i++)
-            {
-                this.chart1.Series[0].Points.AddY(dataQueueSerialA.ElementAt(i));
-            }
-            for (int i = 0; i < dataQueueSerialB.Count; i++)
-            {
-                this.chart1.Series[1].Points.AddY(dataQueueSerialB.ElementAt(i));
+
+
+            int countA = dataQueueSerialA.Count;
+            int countB = dataQueueSerialB.Count;
+            int countMax = countA > countB ? countA : countB;
+            Console.WriteLine("countA " + dataQueueSerialA.Count + "countB " + dataQueueSerialB.Count + "\r\n");
+            for (int i = 0; i < countMax; i++){
+                if (i < countA) {
+                    this.chart1.Series[0].Points.AddY(dataQueueSerialA.ElementAt(i));
+                }
+                if (i < countB) {
+                    this.chart1.Series[1].Points.AddY(dataQueueSerialB.ElementAt(i));
+                }
             }
         }
 
@@ -241,8 +253,8 @@ namespace BalanceMeasure
             this.chart1.ChartAreas.Add(chartArea1);
             //定义存储和显示点的容器
             this.chart1.Series.Clear();
-            Series series1 = new Series("Left");
-            Series series2 = new Series("Right");
+            Series series1 = new Series("Left-A");
+            Series series2 = new Series("Right-B");
             series1.ChartArea = "C1";
             series2.ChartArea = "C1";
             this.chart1.Series.Add(series1);
@@ -293,7 +305,7 @@ namespace BalanceMeasure
             if (dataQueueSerialA.Count >= QUEUE_LEN)
             {
                 //先出列
-                for (int i = 0; i < num; i++)
+                for (int i = 0; i < dataQueueSerialA.Count; i++)
                 {
                     dataQueueSerialA.Dequeue();
                 }
@@ -301,7 +313,7 @@ namespace BalanceMeasure
             if (dataQueueSerialB.Count >= QUEUE_LEN)
             {
                 //先出列
-                for (int i = 0; i < num; i++)
+                for (int i = 0; i < dataQueueSerialB.Count; i++)
                 {
                     dataQueueSerialB.Dequeue();
                 }
@@ -311,6 +323,16 @@ namespace BalanceMeasure
         private void label5_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            textBox1.Clear();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            textBox2.Clear();
         }
     }
 
