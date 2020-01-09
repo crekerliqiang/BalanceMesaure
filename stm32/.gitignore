@@ -1,0 +1,17 @@
+#proj
+*.txt
+JLinkLog.txt
+*.map
+*.liqiang
+*.uvoptx
+/DPROJECT/Listings/*.map
+/obj/*.o
+/obj/*.d
+/obj/*.crf
+/obj/*.htm
+/obj/*.dep
+/obj/*.axf
+/obj/*.lnp
+/obj/*.DS_Store
+*.DS_Store
+
