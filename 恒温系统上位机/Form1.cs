@@ -82,6 +82,7 @@ namespace BalanceMeasure
                             string[] sArray = Regex.Split(str, "-", RegexOptions.IgnoreCase);
                         str = sArray[sArray.Length - 1];
                         Console.WriteLine("add countA " + str + " num " + dataQueueSerialA.Count + "\r\n");
+
                         float f1 = Math.Abs(Convert.ToSingle(str));
                             checkRemoveQueue();
                             //对数据B 做处理 方便显示
@@ -129,6 +130,7 @@ namespace BalanceMeasure
                     }
                 }catch{
                         textBox2.AppendText("串口数据接收出错，请检查!\r\n");
+
                 }
             }
 
@@ -226,7 +228,7 @@ namespace BalanceMeasure
         private const int Y_MAX = 20;
         private const int QUEUE_LEN = 20;
         private Queue<double> dataQueueSerialA = new Queue<double>(QUEUE_LEN);
-        private Queue<double> dataQueueSerialB = new Queue<double>(QUEUE_LEN);
+        //private Queue<double> dataQueueSerialB = new Queue<double>(QUEUE_LEN);
         private bool isStarted = false;
    
         private void btnStart_Click(object sender, EventArgs e)
@@ -258,8 +260,11 @@ namespace BalanceMeasure
         {
          
             //定时更新数据
+<<<<<<< HEAD
             this.chart1.Series[0].Points.Clear();
             this.chart1.Series[1].Points.Clear();
+
+
             int countA = dataQueueSerialA.Count;
             int countB = dataQueueSerialB.Count;
             int countMax = countA > countB ? countA : countB;
@@ -272,6 +277,24 @@ namespace BalanceMeasure
                     this.chart1.Series[1].Points.AddY(dataQueueSerialB.ElementAt(i));
                 }
             }
+=======
+            //this.chart1.Series[0].Points.Clear();
+            //this.chart1.Series[1].Points.Clear();
+            //
+            //
+            //int countA = dataQueueSerialA.Count;
+            //int countB = dataQueueSerialB.Count;
+            //int countMax = countA > countB ? countA : countB;
+            //Console.WriteLine("countA " + dataQueueSerialA.Count + "countB " + dataQueueSerialB.Count + "\r\n");
+            //for (int i = 0; i < countMax; i++){
+            //    if (i < countA) {
+            //        this.chart1.Series[0].Points.AddY(dataQueueSerialA.ElementAt(i));
+            //    }
+            //    if (i < countB) {
+            //        this.chart1.Series[1].Points.AddY(dataQueueSerialB.ElementAt(i));
+            //    }
+            //}
+>>>>>>> b315e3220b4442d50a6eacf6a1319297168f03ba
         }
 
         /// <summary>
@@ -337,13 +360,22 @@ namespace BalanceMeasure
             if (dataQueueSerialA.Count >= QUEUE_LEN)
             {
                 dataQueueSerialA.Clear();
+                //先出列
+                //for (int i = 0; i < dataQueueSerialA.Count; i++)
+                //{
+                //    dataQueueSerialA.Dequeue();
+                //}
             }
             if (dataQueueSerialB.Count >= QUEUE_LEN)
             {
                 dataQueueSerialB.Clear();
+                //先出列
+                //for (int i = 0; i < dataQueueSerialB.Count; i++)
+                //{
+                //    dataQueueSerialB.Dequeue();
+                //}
             }
         }
-
 
         private void label5_Click(object sender, EventArgs e)
         {
