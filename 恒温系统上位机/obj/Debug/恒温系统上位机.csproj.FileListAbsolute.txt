@@ -69,3 +69,16 @@ C:\Users\86176\Desktop\1\恒温系统上位机\obj\Debug\恒温控制系统上�
 C:\Users\86176\Desktop\1\恒温系统上位机\obj\Debug\恒温系统上位机.csproj.GenerateResource.cache
 C:\Users\86176\Desktop\1\恒温系统上位机\obj\Debug\恒温控制系统上位机.exe
 C:\Users\86176\Desktop\1\恒温系统上位机\obj\Debug\恒温控制系统上位机.pdb
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\obj\Debug\恒温系统上位机.csprojAssemblyReference.cache
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\obj\Debug\Interop.NATUPNPLib.dll
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\obj\Debug\恒温系统上位机.csproj.ResolveComReference.cache
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\obj\Debug\BalanceMeasure.Form1.resources
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\obj\Debug\恒温控制系统上位机.Properties.Resources.resources
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\obj\Debug\恒温系统上位机.csproj.GenerateResource.cache
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\obj\Debug\恒温控制系统上位机.exe
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\obj\Debug\恒温控制系统上位机.pdb
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\bin\Debug\恒温控制系统上位机.exe.config
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\bin\Debug\恒温控制系统上位机.exe
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\bin\Debug\恒温控制系统上位机.pdb
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\bin\Debug\TCPLibrary.dll
+E:\1.yuanhua\balance\code\BalanceMesaure\恒温系统上位机\obj\Debug\恒温系统上位机.csproj.CopyComplete
